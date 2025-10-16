@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fargate-web-app
+  namespace: fargate-ns
+  labels:
+    app: fargate-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fargate-web
+  template:
+    metadata:
+      labels:
+        app: fargate-web
+    spec:
+      containers:
+      - name: web-server
+        image: nginx:1.20
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        env:
+        - name: COMPUTE_TYPE
+          value: "fargate"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fargate-web-service
+  namespace: fargate-ns
+spec:
+  selector:
+    app: fargate-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

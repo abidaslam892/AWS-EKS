@@ -1,0 +1,36 @@
+# Binaries
+eksctl
+kubectl
+
+# AWS Config files (sensitive)
+.aws/
+*.pem
+*.key
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.directory
+
+# Kubernetes config (may contain sensitive data)
+kubeconfig*
+
+# Terraform files (if any)
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Local testing files
+test-*
+temp-*

@@ -1,0 +1,37 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: my-eks-cluster
+  region: us-east-1
+
+# Fargate Profiles
+fargateProfiles:
+  - name: default-fargate
+    selectors:
+      - namespace: default
+        labels:
+          compute-type: fargate
+      - namespace: fargate-ns
+  - name: app-fargate
+    selectors:
+      - namespace: applications
+        labels:
+          compute-type: fargate
+      - namespace: web-apps
+        labels:
+          tier: frontend
+  - name: system-fargate
+    selectors:
+      - namespace: kube-system
+        labels:
+          compute-type: fargate
+    # Custom subnet selection (optional)
+    subnets:
+      - subnet-038cd6c2de82a8427  # Use existing private subnets
+      - subnet-0a685d60d5360fabf
+    # Custom tags
+    tags:
+      Environment: production
+      Team: platform
+      CostCenter: infrastructure
