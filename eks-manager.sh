@@ -21,19 +21,29 @@ show_help() {
     echo ""
     echo "Usage: $0 [COMMAND]"
     echo ""
-    echo "Commands:"
+    echo -e "${GREEN}📊 Cluster Management:${NC}"
     echo "  create     Create a new EKS cluster"
-    echo "  delete     Delete the EKS cluster"
+    echo "  delete     Delete cluster (with complete cleanup options)"
     echo "  status     Show cluster status"
     echo "  nodes      Show cluster nodes"
     echo "  pods       Show all pods"
     echo "  services   Show all services"
+    echo ""
+    echo -e "${YELLOW}🚀 Application Management:${NC}"
     echo "  test       Deploy test application"
     echo "  cleanup    Remove test applications"
     echo "  fargate    Setup Fargate profiles"
     echo "  fargate-test Deploy Fargate test apps"
     echo "  fargate-clean Clean Fargate test apps"
+    echo ""
+    echo -e "${CYAN}🧹 Cost Management:${NC}"
+    echo "  destroy    Complete resource cleanup (prevents all charges)"
+    echo ""
+    echo -e "${BLUE}💡 General:${NC}"
     echo "  help       Show this help message"
+    echo ""
+    echo -e "${RED}💰 Cost Alert: This cluster costs ~$157.40/month${NC}"
+    echo -e "${GREEN}Use 'destroy' command to delete ALL resources and stop charges${NC}"
 }
 
 create_cluster() {
@@ -42,15 +52,42 @@ create_cluster() {
 }
 
 delete_cluster() {
-    echo -e "${RED}Deleting EKS cluster...${NC}"
-    read -p "Are you sure you want to delete the cluster? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        ./eksctl delete cluster --name $CLUSTER_NAME --region $REGION
-        echo -e "${GREEN}Cluster deleted successfully!${NC}"
-    else
-        echo -e "${YELLOW}Cluster deletion cancelled.${NC}"
-    fi
+    echo -e "${RED}🚨 CLUSTER DELETION OPTIONS 🚨${NC}"
+    echo ""
+    echo -e "${YELLOW}Choose deletion method:${NC}"
+    echo "1. Quick cluster deletion (cluster only)"
+    echo "2. Complete resource cleanup (ALL resources + cost prevention)"
+    echo "3. Cancel"
+    echo ""
+    read -p "Select option (1-3): " -n 1 -r choice
+    echo ""
+    echo ""
+    
+    case $choice in
+        1)
+            echo -e "${RED}Quick cluster deletion selected${NC}"
+            read -p "Are you sure you want to delete just the cluster? (y/N): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                ./eksctl delete cluster --name $CLUSTER_NAME --region $REGION
+                echo -e "${GREEN}Cluster deleted successfully!${NC}"
+                echo -e "${YELLOW}⚠️ Note: Some resources may remain and continue to incur costs${NC}"
+            else
+                echo -e "${YELLOW}Cluster deletion cancelled.${NC}"
+            fi
+            ;;
+        2)
+            echo -e "${RED}Complete resource cleanup selected${NC}"
+            echo -e "${CYAN}This will delete ALL resources to prevent any future charges${NC}"
+            ./scripts/cleanup-all-resources.sh
+            ;;
+        3)
+            echo -e "${GREEN}Deletion cancelled.${NC}"
+            ;;
+        *)
+            echo -e "${RED}Invalid option. Deletion cancelled.${NC}"
+            ;;
+    esac
 }
 
 show_status() {
@@ -120,12 +157,21 @@ cleanup_fargate_test() {
     echo -e "${GREEN}Fargate test applications cleaned up!${NC}"
 }
 
+complete_resource_cleanup() {
+    echo -e "${RED}🚨 COMPLETE RESOURCE CLEANUP 🚨${NC}"
+    echo -e "${YELLOW}This will delete ALL AWS resources to prevent any charges${NC}"
+    ./scripts/cleanup-all-resources.sh
+}
+
 case "${1:-help}" in
     create)
         create_cluster
         ;;
     delete)
         delete_cluster
+        ;;
+    destroy)
+        complete_resource_cleanup
         ;;
     status)
         show_status

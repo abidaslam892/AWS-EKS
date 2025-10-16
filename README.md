@@ -127,7 +127,8 @@ kubectl port-forward -n web-apps service/frontend-clusterip 9080:80
 
 Commands:
 ├── create          # Create new EKS cluster
-├── delete          # Delete cluster (with confirmation)
+├── delete          # Delete cluster (with cleanup options)
+├── destroy         # 🚨 COMPLETE resource cleanup (prevent ALL charges)
 ├── status          # Show cluster health & details
 ├── nodes           # Display worker nodes
 ├── pods            # List all pods across namespaces
@@ -147,6 +148,8 @@ Commands:
 | `fix-loadbalancer.sh` | Alternative access methods | When LoadBalancer has issues |
 | `verify-cluster.sh` | Complete cluster validation | Health checks & testing |
 | `monitor-cluster.sh` | Real-time cluster monitoring | Deployment progress tracking |
+| **`cleanup-all-resources.sh`** | **🚨 Complete resource cleanup** | **Prevent ALL charges** |
+| **`cost-monitor.sh`** | **💰 Real-time cost tracking** | **Monitor AWS expenses** |
 
 ### Configuration Templates
 
@@ -278,21 +281,74 @@ kubectl apply -f manifests/hpa-config.yaml
 
 *Fargate pricing scales linearly with actual usage - no idle EC2 costs*
 
-## �🗑️ Cleanup
+### 🚨 Revenue Leakage Prevention
 
-### Remove Test Applications
+| Risk Level | Resource | Monthly Cost | Prevention |
+|------------|----------|--------------|------------|
+| 🔴 **High** | EKS Control Plane | $72.00 | Use `destroy` command |
+| 🟡 **Medium** | Fargate Pods | $7.20/pod | Scale down replicas |
+| 🟡 **Medium** | Load Balancers | $18.00/each | Delete unused services |
+| 🟢 **Low** | EBS Volumes | $0.10/GB | Delete PVCs |
 
+**🎯 Zero-Cost Commands:**
+```bash
+./eks-manager.sh destroy        # Delete everything (interactive)
+./scripts/cost-monitor.sh       # Track active costs
+./scripts/cleanup-all-resources.sh  # Complete cleanup
+./emergency-cleanup.sh          # INSTANT emergency cleanup
+```
+
+## 🗑️ Resource Cleanup & Cost Management
+
+### 💰 Monitor Current Costs
+```bash
+# Real-time cost monitoring and resource tracking
+./scripts/cost-monitor.sh
+
+# Options:
+# 1. Check current resource costs
+# 2. Cost optimization tips  
+# 3. Setup billing alerts
+# 4. Quick cleanup
+# 5. Open AWS Cost Explorer
+```
+
+### 🧹 Cleanup Options
+
+#### Remove Test Applications Only
 ```bash
 ./eks-manager.sh cleanup
 ```
 
-### Delete the Entire Cluster
-
+#### Smart Cluster Deletion (Interactive)
 ```bash
 ./eks-manager.sh delete
+
+# Options:
+# 1. Quick cluster deletion (cluster only)
+# 2. Complete resource cleanup (ALL resources)
+# 3. Cancel
 ```
 
-**⚠️ Warning:** This will delete the entire cluster and all resources. Make sure to backup any important data first.
+#### 🚨 COMPLETE Resource Cleanup (Recommended)
+```bash
+# Delete ALL resources to prevent ANY charges
+./eks-manager.sh destroy
+
+# Or run directly:
+./scripts/cleanup-all-resources.sh
+```
+
+**✅ What Gets Deleted:**
+- EKS Cluster & Fargate Profiles
+- Load Balancers (Classic, ALB, NLB)
+- EBS Volumes & Persistent Storage
+- VPC, Subnets, Security Groups
+- NAT Gateways & Elastic IPs
+- CloudWatch Log Groups
+- IAM Roles & Policies (EKS-related)
+
+**💸 Result: $0/month charges - Complete cost elimination**
 
 
 
